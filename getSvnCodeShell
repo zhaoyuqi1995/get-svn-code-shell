@@ -1,0 +1,28 @@
+useWay:执行此脚本 可以从svn自动获取代码 进行同步 原来的代码进行备份
+shell:
+
+#!/bin/bash
+
+deploy_root_path=$(cd `dirname $0`;pwd)
+echo $deploy_root_path
+pro_path=$deploy_root_path/zhao_project
+echo $pro_path
+checkout_path=$deploy_root_path/zhaoPro_checkout
+echo $checkout_path
+svn co svn://0.0.0.0/pro/branches/zhao_project-1.0 $checkout_path  --username yuqizhao --password 123123
+
+svn_version=`svn info svn://0.0.0.0/pro/branches/zhao_project-1.0 | awk 'NR==5{print $2}'`
+date=`date +%Y-%m-%d`
+v=1.0
+echo "latestVersion:$v.$svn_version.$date"
+
+cd $checkout_path
+mvn clean package -DskipTests
+
+cp -r $pro_path/WEB-INF/classes $pro_path/WEB-INF/classes_bak
+cp -r $pro_path/WEB-INF/lib $pro_path/WEB-INF/lib_bak
+rm -rf  $pro_path/WEB-INF/classes
+rm -rf $pro_path/WEB-INF/lib
+
+cp -r $checkout_path/target/manual-verification-0.0.1-SNAPSHOT/WEB-INF/classes $pro_path/WEB-INF/classes
+cp -r $checkout_path/target/manual-verification-0.0.1-SNAPSHOT/WEB-INF/lib $pro_path/WEB-INF/lib
